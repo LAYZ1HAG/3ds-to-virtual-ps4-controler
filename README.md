@@ -13,10 +13,12 @@ I'm not sure about this because I don't have the opportunity to test on differen
 
 Well, if you were able to install everything and get it running, you should see something like this:
 
-On 3ds
+On 3ds:
+
 <img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/1e436e37-f754-411b-94da-300060c853e9" />
 
-On PC
+On PC:
+
 <img width="738" height="202" alt="{7D068DFB-F120-4E91-A826-9D7E26046D6F}" src="https://github.com/user-attachments/assets/5633593b-c19a-4314-b7de-b493e083bd2d" />
 
 Next, you need to enter the port on your PC. It is recommended to leave it at default and just press enter. Then you'll see your PC's local IP address. It'll most likely be this one. Now return to your console, press Y, and enter the IP and port one by one. Then select the connection you just created, and that's it.
