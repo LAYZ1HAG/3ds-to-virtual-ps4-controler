@@ -25,4 +25,4 @@ Next, you need to enter the port on your PC. It is recommended to leave it at de
 
 If you did everything correctly, you'll see a green "connected" sign. I'm too lazy to explain what you can do with this. But I'll still explain the process a bit: you've created a virtual PS4 controller on your PC, and all controls from your 3DS are sent to this controller via WiFi. The programs have some useful features, like turning off the console's display or calibrating the PC's gyroscope. It's not much, but it's honest work.
 
-
+For those who'd like to try their hand at modifying it, I've left the entire source code. In the 3ds folder, you'll find everything you need to create this program, but you'll need to download devcitpro for ARM, etc., and the same for PC. In 3DSYaPiDoor Win64, you'll find a bat file. If you run it after installing micsft .net 8 or higher, a ready-made build of the same program will be created in the build folder. I think you'll figure it out (though I doubt anyone will need it XDD).
