@@ -189,8 +189,8 @@ int checkconnection(int sockfd) {
     struct timeval timeout;
     FD_ZERO(&readfds);
     FD_SET(sockfd, &readfds);
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 100000;
     
     if (select(sockfd + 1, &readfds, NULL, NULL, &timeout) > 0) {
         ssize_t received = recv(sockfd, pong_buf, sizeof(pong_buf) - 1, 0);
