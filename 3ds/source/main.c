@@ -190,7 +190,7 @@ int checkconnection(int sockfd) {
     FD_ZERO(&readfds);
     FD_SET(sockfd, &readfds);
     timeout.tv_sec = 0;
-    timeout.tv_usec = 100000;
+    timeout.tv_usec = 300000;
     
     if (select(sockfd + 1, &readfds, NULL, NULL, &timeout) > 0) {
         ssize_t received = recv(sockfd, pong_buf, sizeof(pong_buf) - 1, 0);
@@ -206,43 +206,57 @@ int sendcontrollerstate(int sockfd, controllerstate *state) {
     return send(sockfd, state, sizeof(controllerstate), 0);
 }
 
-void getbatterystatus(char *buffer, size_t size) {
-    u8 percentage, charging;
-    PTMU_GetBatteryLevel(&percentage);
-    PTMU_GetBatteryChargeState(&charging);
-    
-    int actualpercentage = (percentage + 1) * 20;
-    if (actualpercentage > 100) actualpercentage = 100;
-    
-    if (charging) snprintf(buffer, size, "%d%% CHG", actualpercentage);
-    else snprintf(buffer, size, "%d%%", actualpercentage);
-}
-
-void printstatusmessage(int sockfd, const config_entry *cfg, int isconnected, int lcdstate) {
+void draw_status_template(const config_entry *cfg) {
     consoleClear();
-    char batterystatus[32];
-    getbatterystatus(batterystatus, sizeof(batterystatus));
-    
     printf("\x1b[8;6H+-------------------------------------+");
     printf("\x1b[9;6H|          \x1b[1;36mYaPiDoor controll\x1b[0m          |");
     printf("\x1b[10;6H+-------------------------------------+");
-    
-    if (isconnected) 
-        printf("\x1b[11;6H| Status:   \x1b[32mCONNECTED\x1b[0m                 |");
-    else 
-        printf("\x1b[11;6H| Status:   \x1b[31mWAITING FOR CONNECTION\x1b[0m    |");
-    
+    printf("\x1b[11;6H| Status:                             |");
     printf("\x1b[12;6H| IP:       %-25s |", cfg->serverip);
-	printf("\x1b[13;6H| Port:     %-25d |", cfg->port);
-	printf("\x1b[14;6H| Battery:  %-25s |", batterystatus);
-    
+    printf("\x1b[13;6H| Port:     %-25d |", cfg->port);
+    printf("\x1b[14;6H| Battery:                            |");
     printf("\x1b[15;6H+-------------------------------------+");
     printf("\x1b[16;6H|              \x1b[1;33mCONTROLS\x1b[0m               |");
-	printf("\x1b[17;6H|                                     |");
+    printf("\x1b[17;6H|                                     |");
     printf("\x1b[18;6H| Hold L+R:         Toggle LCD        |");
     printf("\x1b[19;6H| LEFT+B+SELECT:    Back to menu      |"); 
     printf("\x1b[20;6H| START+SELECT:     Exit              |");
     printf("\x1b[21;6H+-------------------------------------+");
+}
+
+void update_status_dynamic(int isconnected) {
+    if (isconnected) {
+        printf("\x1b[11;18H\x1b[32mCONNECTED             \x1b[0m");
+    } else {
+        printf("\x1b[11;18H\x1b[31mWAITING FOR CONNECTION\x1b[0m");
+    }
+
+    u8 battery_level, charging;
+    PTMU_GetBatteryLevel(&battery_level);
+    PTMU_GetBatteryChargeState(&charging);
+	
+	if (battery_level > 4) battery_level = 4;
+	
+	char bar_str[16] = {0};
+    int bars_to_draw = battery_level + 1;
+	
+	for (int i = 0; i < 5; i++) {
+        if (i < bars_to_draw) {
+            bar_str[i] = '|';
+        } else {
+            bar_str[i] = ' ';
+        }
+    }
+    bar_str[5] = '\0';
+    
+    char batterystatus[32];
+    if (charging) {
+        snprintf(batterystatus, sizeof(batterystatus), "[%s] (CHG)", bar_str);
+    } else {
+        snprintf(batterystatus, sizeof(batterystatus), "[%s]", bar_str);
+    }
+
+    printf("\x1b[14;18H%-25s", batterystatus);
 }
 
 int main(int argc, char **argv) {
@@ -296,12 +310,13 @@ int main(int argc, char **argv) {
             
             int sockfd = initsocket(&active_cfg);
             int isconnected = 0;
-            int lcdstate = 1;
             bool combo_pressed = false;
 			u64 hold_start_time = 0;
 			bool screens_on = true;
             u32 connectionchecktime = 0;
             u32 laststatusupdate = 0;
+			
+			draw_status_template(&active_cfg);
 
             while (aptMainLoop()) {
                 hidScanInput();
@@ -389,7 +404,7 @@ int main(int argc, char **argv) {
                 }
                 
                 if (currenttime - laststatusupdate > 1000) {
-                    printstatusmessage(sockfd, &active_cfg, isconnected, lcdstate);
+                    update_status_dynamic(isconnected);
                     laststatusupdate = currenttime;
                 }
                 
