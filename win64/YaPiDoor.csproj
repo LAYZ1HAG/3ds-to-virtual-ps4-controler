@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>YaPiDoor</AssemblyName>
+    <RootNamespace>YaPiDoor</RootNamespace>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- DLL встраивается прямо в exe как ресурс и распаковывается во временную папку при запуске -->
+    <EmbeddedResource Include="ViGEmClient.dll">
+      <LogicalName>YaPiDoor.ViGEmClient.dll</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
